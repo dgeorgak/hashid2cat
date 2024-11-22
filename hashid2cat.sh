@@ -38,7 +38,7 @@ if echo "$output" | grep -q "Unknown hash"; then
 fi
 
 # Extract probable hash types, remove "[+] ", and save to a file
-file_name="${input_string:0:10}-.txt"
+file_name="${input_string:0:10}-hashtypes.txt"
 echo "$output" | grep "\[+\] " | sed 's/^\[+\] //' > "$file_name"
 
 # Display the extracted hash types
