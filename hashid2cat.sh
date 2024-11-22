@@ -48,6 +48,9 @@ hashcat_manual=$(man hashcat | sed -n '/^ *Hash types/,/^$/p')
 matches_found=0
 hashcat_numbers_file="${input_string:0:10}-hashcat.txt"
 
+# TODO: Take out after the script is done
+echo " "
+
 while read -r hash_type; do
     match=$(echo "$hashcat_manual" | grep -i " = $hash_type" | awk -F ' ' '{print $1}')
     if [[ -n "$match" ]]; then
@@ -57,8 +60,10 @@ while read -r hash_type; do
 done < "$file_name"
 
 if [[ $matches_found -eq 0 ]]; then
-    echo "No matches found in the hashcat manual for the hash types."
+    echo "No matches found in hashcat for the hash types requested"
 else
-    echo "Matches found in the hashcat manual. Saved to $hashcat_numbers_file:"
     cat "$hashcat_numbers_file"
 fi
+
+# TODO:  Uncomment once the script is done
+# rm "$hashcat_numbers_file"
