@@ -8,3 +8,9 @@ A simple script that:
 
 Recommended for using it in cases that a hash is of unknown type.  That is because running hashcat through all generated hashtypes can take a long time.
 If the hashtype is obvious (eg MD5), then it's best to run it directly against hashcat as it will take less time.
+
+Important:
+This tool has many issues still.  
+There are quite a few discrepancies between the naming convention of hashid's output and hashcat's hash types.  
+This makes the output not yet trustworthy.
+

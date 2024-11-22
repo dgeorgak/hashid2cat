@@ -41,3 +41,24 @@ file_name="${input_string:0:10}-hashtypes.txt"
 echo "$output" | grep "\[+\] " | sed 's/^\[+\] //' > "$file_name"
 cat "$file_name"
 
+# Parse hashcat manual for "Hash types"
+hashcat_manual=$(man hashcat | sed -n '/^ *Hash types/,/^$/p')
+
+# Match hash types in the hashcat manual
+matches_found=0
+hashcat_numbers_file="${input_string:0:10}-hashcat.txt"
+
+while read -r hash_type; do
+    match=$(echo "$hashcat_manual" | grep -i " = $hash_type" | awk -F ' ' '{print $1}')
+    if [[ -n "$match" ]]; then
+        echo "$match" >> "$hashcat_numbers_file"
+        matches_found=1
+    fi
+done < "$file_name"
+
+if [[ $matches_found -eq 0 ]]; then
+    echo "No matches found in the hashcat manual for the hash types."
+else
+    echo "Matches found in the hashcat manual. Saved to $hashcat_numbers_file:"
+    cat "$hashcat_numbers_file"
+fi
