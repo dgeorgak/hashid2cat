@@ -25,21 +25,19 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-# Input string
 input_string="$1"
 
 # Run hashid on the input string
 output=$(hashid "$input_string")
 
-# Check if the output is "unknown hash"
+# Check if the hash type is not recognised
 if echo "$output" | grep -q "Unknown hash"; then
     echo "unknown hash"
     exit 0
 fi
 
-# Extract probable hash types, remove "[+] ", and save to a file
+# Extract hash types in a file and as an output message
 file_name="${input_string:0:10}-hashtypes.txt"
 echo "$output" | grep "\[+\] " | sed 's/^\[+\] //' > "$file_name"
-
-# Display the extracted hash types
 cat "$file_name"
+
