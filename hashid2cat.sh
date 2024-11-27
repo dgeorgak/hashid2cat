@@ -48,9 +48,6 @@ hashcat_manual=$(man hashcat | sed -n '/^ *Hash types/,/^$/p')
 matches_found=0
 hashcat_numbers_file="${input_string:0:10}-hashcat.txt"
 
-# TODO: Take out after the script is done
-echo " "
-
 while read -r hash_type; do
     match=$(echo "$hashcat_manual" | grep -i " = $hash_type" | awk -F ' ' '{print $1}')
     if [[ -n "$match" ]]; then
@@ -72,34 +69,30 @@ if [[ ! -f "$wordlist" ]]; then
     exit 1
 fi
 
-# Run hashcat looping through detected hash types
-while read -r mode; do
-    echo "Running hashcat with mode $mode..."
-    hashcat_output=$(hashcat -m "$mode" -a 0 "$input_string" "$wordlist" 2>&1)
-    # echo "$hashcat_output"
-    echo " "
-    if echo "$hashcat_output" | grep -q "Recovered........: 1/1 (100.00%)" || echo "$hashcat_output" | grep -q "INFO: All hashes found as potfile and/or empty entries!"; then
-        echo "Hash successfully cracked with mode $mode:"
-	potfile_output=$(hashcat -m "$mode" -a 0 "$input_string" "$wordlist" --show 2>&1)
-        rm "$hashcat_numbers_file"
-        echo "$potfile_output"
-        exit 0
-    elif echo "$hashcat_output" | grep -q "Recovered........: 0/1 (0.00%)"; then
-        echo "Hash not cracked with mode $mode. Waiting for hashcat to stop..."
-        # Wait for the "Stopped: " message before continuing
-        while true; do
-            hashcat_status=$(hashcat -m "$mode" --status --status-json --quiet 2>/dev/null)
-            if echo "$hashcat_status" | grep -q "Stopped: "; then
-                echo "Hashcat has stopped. Proceeding to the next mode..."
-                break
-            fi
-            sleep 1
-        done
-    fi
-done < "$hashcat_numbers_file"
-
-# TODO:  Uncomment once the script is done
-rm "$hashcat_numbers_file"
+modes=($(cat "$hashcat_numbers_file"))
+i=0
+if [ ${#modes[@]} -gt 0 ]; then
+    # Run hashcat looping through detected hash types
+    while [ $i -lt ${#modes[@]} ]; do
+        mode=${modes[$i]}
+        echo "Running hashcat with mode $mode"
+        hashcat_output=$(hashcat -m "$mode" -a 0 "$input_string" "$wordlist" 2>&1)
+        if echo "$hashcat_output" | grep -q "Recovered........: 1/1 (100.00%)" || echo "$hashcat_output" | grep -q "INFO: All hashes found as potfile and/or empty entries!"; then
+            echo "Hash successfully cracked with mode $mode:"
+        potfile_output=$(hashcat -m "$mode" -a 0 "$input_string" "$wordlist" --show 2>&1)
+            rm "$hashcat_numbers_file"
+            echo "$potfile_output"
+            exit 0
+        elif echo "$hashcat_output" | grep -q "Stopped:"; then
+            echo "No results with mode $mode.  Proceeding to next mode."
+            echo " "
+        fi
+        ((i++))
+    done
+else
+    echo "No modes found"
+    exit 0
+fi    
 
 echo "Hash not cracked with any of the detected modes."
 exit 0
