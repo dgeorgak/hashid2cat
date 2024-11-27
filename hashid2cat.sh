@@ -65,7 +65,7 @@ fi
 wordlist="/usr/share/wordlists/rockyou.txt"
 
 if [[ ! -f "$wordlist" ]]; then
-    echo "Error: Wordlist $wordlist not found. Please ensure rockyou.txt is installed and available."
+    echo "Error: Wordlist not found. Please ensure rockyou.txt is available under /usr/share/wordlists/rockyou.txt."
     exit 1
 fi
 
